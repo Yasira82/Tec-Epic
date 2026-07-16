@@ -1,15 +1,68 @@
-# TEC Domain App Template — Claude Code Instructions
+# TEC Epic — Claude Code Instructions
 
-## What This Repo Is
+> ⚡ **SESSION START:** اقرأ `knowledge-base/C-02___CURRENT_STATE_.md` + **app charter
+> `knowledge-base/C-125___EPIC_CREATION_RUNTIME.md`** من `yasira82/tec-knowledge-base` (branch: `main`).
 
-The **golden starter template** for a new app in the TEC Federated Platform.
-It ships a correct, Portal-ready skeleton: Hub SSO, dual-mode Pi payments,
-CSRF, legal pages, and CI policy guards. Clone it, run the "New app setup"
-checklist below, and you have a compliant app — no missing pieces.
+## What This App Is
 
-**Reference of record:** `yasira82/tec-knowledge-base` — especially
-`C-12_Dual_Mode_Payment.md` (payment + anti-regression) and
-`audits/PORTAL_SUBMISSION_RUNBOOK_*.md`.
+**The Creation Runtime** of the Pi economy (C-125) — the **System of
+Construction**. Epic answers one question:
+
+```
+"What are you building?"
+```
+
+Epic is the birthplace of new things in TEC: it lets individuals and communities
+**create, launch, and grow** new economic initiatives — startups, communities,
+campaigns, events, challenges, programs, initiatives. Where Hub manages *who you
+are*, Epic manages *what you are creating*. The critical value chain is:
+
+```
+Epic (create) → Zone (verify) → activity (execute) → Legend (earn)
+```
+
+Built from `tec-template-base` (Next.js 15 frontend).
+
+**Current Phase: Epic V0/V1 — Creation preview (read-only).** Identity / domain /
+slug / legal + a themed **project board** (sample projects · type · lifecycle ·
+Zone-verified · funding) + a `/project/[id]` detail (lifecycle pipeline +
+milestones + FundX-presented funding) + **Epic Pro** (the Pi Portal "Process a
+Transaction" gate). Real project creation / funding is Phase 2 (gated on Zone +
+FundX + Connection live). Not yet deployed.
+
+---
+
+## Pi App Identity
+
+| Field | Value |
+|-------|-------|
+| **App** | TEC Epic |
+| **Domain** | `https://epic.tecosystem.app` |
+| **Pi App ID** | ⏳ TBD — register at Pi Developer Portal · then Vercel `NEXT_PUBLIC_PI_APP_ID` |
+| **APP_SOURCE slug** | `epic` (payment-service resolves `PI_API_KEY_EPIC`) |
+| **PI_SANDBOX** | `false` (Mainnet) |
+
+---
+
+## Epic-Specific Rules (C-125)
+
+### The creation boundary — Epic builds; the owning systems verify/fund/record
+Epic **OWNS**: project creation (type · name · description · category), project
+structure (team + roles · goals + milestones · public launch), and the project
+lifecycle (`DRAFT → ACTIVE → FUNDED → COMPLETED → LEGEND`). Epic does **NOT OWN**:
+- **Verification** → Zone verifies Epic projects (Epic cannot self-verify).
+- **Capital** → FundX manages funding flows (Epic never moves Pi directly).
+- **Reputation recording** → Legend records Epic outcomes on completion.
+- **Transactions** → Commerce / payment-service. **Risk** → Insure. **Enterprise** → Titan.
+
+### Isolation (P6)
+Projects are the caller's own — identity from the `tec_user` session cookie
+server-side, **never** a query param or request body. No session → fail closed.
+Public view (browsing active projects) is allowed; creating/editing requires auth.
+
+**Reference of record:** `yasira82/tec-knowledge-base` —
+`C-125___EPIC_CREATION_RUNTIME.md` (charter) + `C-12_Dual_Mode_Payment.md`
+(payment anti-regression) + `C-123` (session/cookies).
 
 ---
 
@@ -43,6 +96,8 @@ if (isHubNavigation() || !(window as any).Pi || !piReady) {
 }
 // Mode 2: standalone — createPaymentRecord() then createU2APayment() (src/lib/pi-payment.ts)
 ```
+> Epic Pro (subscription) is the only buy flow. Approve under `PI_API_KEY_EPIC`
+> (never the default Hub key — the Analytics approve→502 lesson, C-12 §11).
 
 ### ADR-009 — Unified payment contract
 `amount` is a **number**; gateway path is **`/api/payment/*`** (singular); the only
@@ -61,67 +116,51 @@ Identity is derived from the `tec_user` cookie server-side — **never from the 
 
 ---
 
-## What's included
+## Setup status + Roadmap (C-125 §Build Protocol)
 
 ```
-middleware.ts                              CSRF (double-submit OR Origin) + page guard
-src/app/api/auth/sso-callback/route.ts     Hub SSO landing (open-redirect-safe)
-src/app/api/auth/refresh/route.ts          token refresh
-src/app/api/bff/payment/{create,approve,complete,resolve-incomplete}/route.ts
-src/app/api/bff/items/route.ts             example domain route (copy this pattern)
-src/app/api/health/route.ts                health endpoint (C-92/C-96) — fail-safe, public, never 500s
-src/lib/pi-payment.ts                      createPaymentRecord + createU2APayment
-src/lib/pi/PiRuntime.ts                    PAL — single choke-point for window.Pi.* (R1)
-src/lib/pi/PiCircuitBreaker.ts             CLOSED→OPEN→HALF_OPEN (3 fails → 60s)
-src/lib/flags.ts                           feature flags (NEXT_PUBLIC_FLAG_*) + useFlag
-src/lib/observability/logger.ts            structured JSON logger (log.info/warn/error) — no silent failures (C-96)
-src/lib/observability/reportError.ts       Sentry-ready error reporter (single swap-point)
-src/app/privacy/page.tsx · terms/page.tsx  Pi Portal legal pages
-src/styles/tec-design-tokens.css           import in app/layout.tsx
-.github/workflows/ci.yml                   payment-policy + CSRF guard + lint/typecheck/test/build
-```
+Epic V0/V1 — Creation preview (customized from template):
+  ✅ package.json name = tec-epic · APP_SOURCE = 'epic'
+  ✅ sso-callback ALLOWED_AUDIENCES → epic.tecosystem.app + tec-epic.vercel.app
+  ✅ privacy + terms → TEC Epic / epic.tecosystem.app
+  ✅ NEW-A: no NEXT_PUBLIC_API_GATEWAY_URL / Railway host in the client bundle
+  ✅ /app themed: project board (sample) + Epic→Zone→Legend pipeline + Epic Pro (real Pi U2A)
+  ✅ /project/[id] detail (lifecycle + milestones + FundX-presented funding) + BFF /api/bff/epic/projects
 
-**v2 (production-ready by default):** every new app ships
-- `/api/health` — uniform C-92 signal (platform health runtime + observability scrape + SLO/runtime-evidence loop);
-- structured `log` + `reportError` — use `log.error`/`reportError` in catch blocks (a silent error handler is an invisible failure, C-96; `reportError` is the one place to wire Sentry per app);
-- `PiRuntime` (PAL) + `PiCircuitBreaker` — never call `window.Pi.*` directly; go through PiRuntime so an SDK change is a one-file fix (R1) and flapping is contained;
-- `flags.ts` — feature flags from day one (`NEXT_PUBLIC_FLAG_<NAME>`);
-- coverage gate — `npm run test:coverage` (add devDep `@vitest/coverage-v8`; 60% floor, raise as the app grows).
+Next (before live):
+  □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
+    API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · PI_SANDBOX=false.
+  □ payment-service: set PI_API_KEY_EPIC on Railway (approve→502 otherwise, C-12 §11).
+  □ Hub SSO: add epic.tecosystem.app + tec-epic.vercel.app to Hub /api/auth/sso
+    ALLOWED_TARGETS + Hub domain registry.
+  □ Deploy (Vercel) + runtime-verify login (C-123) + a real Epic Pro payment
+    Mode 1 (Hub) AND Mode 2 (standalone).
 
----
-
-## New app setup checklist
-
-```
-□ package.json: set "name"
-□ middleware.ts: adjust PROTECTED_ROUTES
-□ sso-callback/route.ts: set ALLOWED_AUDIENCES + DEFAULT_REDIRECT to your domain
-□ src/lib/pi-payment.ts + payment/create: set APP_SOURCE slug
-□ privacy/page.tsx + terms/page.tsx: set APP / DOMAIN / governing law / contacts
-□ Add ADR-007 isHubNavigation() guard to every buy handler
-□ .env: API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · NEXT_PUBLIC_PI_APP_ID · PI_SANDBOX=false (prod)
-□ Pi Developer Portal: register domain + App ID; set /privacy + /terms URLs
-□ Verify a real Pi payment Mode 1 (via Hub) AND Mode 2 (standalone)
+Epic V1+ (post-Portal — C-125): real project creation (STARTUP + COMMUNITY) → team
+  invitation → milestone tracking → Zone verification request → FundX funding →
+  Connection community formation. Gated on Zone + FundX + Connection live + 1k users.
 ```
 
 ---
 
 ## What NOT To Do
 
+- Do NOT self-verify projects — Zone verifies (Epic presents the badge, never mints it)
+- Do NOT move Pi or hold funding in Epic — FundX executes capital flows
+- Do NOT record reputation in Epic — Legend records outcomes on completion
 - Do NOT validate CSRF in a route handler — middleware only (CI blocks it)
 - Do NOT send `amount` as a string, or use `/payments` / `x-service-secret`
 - Do NOT skip the ADR-007 `isHubNavigation()` guard before `window.Pi`
 - Do NOT store tokens in localStorage; do NOT derive identity from the body
 - Do NOT add `NEXT_PUBLIC_*` for internal service URLs or `INTERNAL_SECRET`
-- Do NOT use an open `redirect` param without the same-origin guard (open redirect)
 
 ---
 
 ## Commit Convention
 
 ```
-feat(scope):  new feature      fix(payment): payment flow fix (test carefully)
-fix(scope):   bug fix          chore(scope): build/config
+feat(epic):  new creation feature   fix(payment): payment flow fix (test carefully)
+fix(epic):   bug fix                 chore(scope):  build/config
 ```
 
 ---
