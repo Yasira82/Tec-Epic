@@ -2,15 +2,21 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { PROJECTS, getProject, TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
+import { PROJECTS, TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
+import { resolveProject } from '@/lib/epic/server';
 
+// Pre-render the curated sample slugs; allow live-only backend projects to render on
+// demand (the Epic read-layer is the project board of record — C-125).
 export function generateStaticParams() {
   return PROJECTS.map((p) => ({ id: p.id }));
 }
+export const dynamicParams = true;
 
 export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const p = getProject(id);
+  // Resolve from the live Epic read-layer; fall back to the curated sample so the
+  // page never 500s. A live 404 is authoritative → notFound().
+  const { project: p } = await resolveProject(id);
   if (!p) notFound();
 
   const t = TYPE_META[p.type];

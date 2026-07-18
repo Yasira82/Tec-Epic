@@ -4,12 +4,25 @@
 // A project board — where new economic initiatives are born. Epic OWNS creation
 // + lifecycle; verification (Zone), funding (FundX), reputation (Legend) are
 // presented from their owning systems. Epic→Zone→activity→Legend.
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { PROJECTS, TYPE_META, STATUS_META } from '@/lib/epic/projects';
+import { PROJECTS, TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
 import EpicPro from './components/EpicPro';
 
 export default function EpicHome() {
+  // The caller's OWN projects — fetched from the BFF (identity from the session
+  // cookie, P6), falling back to the curated sample so the board is never blank.
+  const [projects, setProjects] = useState<Project[]>(PROJECTS);
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/bff/epic/projects', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && Array.isArray(d?.projects)) setProjects(d.projects); })
+      .catch(() => { /* keep the sample */ });
+    return () => { alive = false; };
+  }, []);
+
   return (
     <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -34,7 +47,7 @@ export default function EpicHome() {
         {/* Project board */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 12 }}>Projects</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14 }}>
-          {PROJECTS.map((p) => {
+          {projects.map((p) => {
             const t = TYPE_META[p.type]; const s = STATUS_META[p.status];
             const done = p.milestones.filter((m) => m.done).length;
             return (
