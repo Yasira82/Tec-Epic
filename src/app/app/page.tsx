@@ -5,6 +5,7 @@
 // + lifecycle; verification (Zone), funding (FundX), reputation (Legend) are
 // presented from their owning systems. Epic→Zone→activity→Legend.
 import { useEffect, useState } from 'react';
+import { InviteCard } from '@/components/referral/InviteCard';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
@@ -114,6 +115,7 @@ export default function EpicHome() {
         {/* Epic Pro */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 32, marginBottom: 12 }}>Upgrade</h2>
         <EpicPro />
+        <InviteCard />
       </div>
     </main>
   );

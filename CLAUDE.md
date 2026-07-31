@@ -28,7 +28,7 @@ slug / legal + a themed **project board** (sample projects · type · lifecycle 
 Zone-verified · funding) + a `/project/[id]` detail (lifecycle pipeline +
 milestones + FundX-presented funding) + **Epic Pro** (the Pi Portal "Process a
 Transaction" gate). Real project creation / funding is Phase 2 (gated on Zone +
-FundX + Connection live). Not yet deployed.
+FundX + Connection live). Deployed (Mainnet) · Pi App ID registered · env set · payment live · referral growth loop wired (C-133).
 
 ---
 
@@ -38,7 +38,7 @@ FundX + Connection live). Not yet deployed.
 |-------|-------|
 | **App** | TEC Epic |
 | **Domain** | `https://epic.tecosystem.app` |
-| **Pi App ID** | ⏳ TBD — register at Pi Developer Portal · then Vercel `NEXT_PUBLIC_PI_APP_ID` |
+| **Pi App ID** | ✅ Registered (Mainnet) · Vercel `NEXT_PUBLIC_PI_APP_ID` |
 | **APP_SOURCE slug** | `epic` (payment-service resolves `PI_API_KEY_EPIC`) |
 | **PI_SANDBOX** | `false` (Mainnet) |
 
