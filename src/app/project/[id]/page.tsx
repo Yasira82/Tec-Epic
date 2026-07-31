@@ -1,23 +1,33 @@
-// TEC Epic — project detail (C-125), read-only, statically generated.
+// TEC Epic — project detail (C-125), read-only. Rendered dynamically from the live
+// Epic read-layer — real data end-to-end (C-135 §4): a live 404 is "not found"; an
+// unreachable backend is an honest "couldn't load". Never a fabricated sample.
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { PROJECTS, TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
+import { TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
 import { resolveProject } from '@/lib/epic/server';
 
-// Pre-render the curated sample slugs; allow live-only backend projects to render on
-// demand (the Epic read-layer is the project board of record — C-125).
-export function generateStaticParams() {
-  return PROJECTS.map((p) => ({ id: p.id }));
-}
-export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // Resolve from the live Epic read-layer; fall back to the curated sample so the
-  // page never 500s. A live 404 is authoritative → notFound().
-  const { project: p } = await resolveProject(id);
-  if (!p) notFound();
+  const { project: p, source } = await resolveProject(id);
+
+  if (!p) {
+    if (source === 'live') notFound();
+    return (
+      <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <Link href="/app" style={{ color: TEC_COLORS.gold, fontSize: 13, textDecoration: 'none' }}>← Back</Link>
+          <div style={{ marginTop: 40, padding: '40px 24px', background: TEC_COLORS.surface, borderRadius: 14, textAlign: 'center' }}>
+            <div style={{ fontSize: 28 }}>🚀</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>Couldn&apos;t load this project</div>
+            <p style={{ opacity: 0.65, fontSize: 13.5, marginTop: 6 }}>The Epic read-layer is unavailable right now. Please try again.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const t = TYPE_META[p.type];
   const s = STATUS_META[p.status];
@@ -84,7 +94,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           Verification is minted by Zone, funding executed by FundX, and completion recorded in Legend —
-          Epic presents them by ID and never re-derives them (C-125). Read-only sample.
+          Epic presents them by ID and never re-derives them (C-125).
         </p>
       </div>
     </main>

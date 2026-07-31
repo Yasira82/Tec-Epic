@@ -6,7 +6,7 @@ import { resolveOwnProjects } from '@/lib/epic/server';
 // COORDINATES the owning apps (Zone verifies, FundX funds, Legend records).
 // Identity is derived from the `tec_user` session cookie server-side — NEVER a query
 // param or body (P6). The owner is passed to the backend; on no session / unreachable
-// backend, the curated sample is served so the board is never blank. Verification is
+// backend the source is 'unavailable' with no projects (honest empty state, C-135 §4). Verification is
 // presented from Zone and funding from FundX — never derived here.
 function ownerFromSession(req: NextRequest): string | null {
   try {

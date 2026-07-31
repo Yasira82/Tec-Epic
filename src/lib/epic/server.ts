@@ -1,12 +1,12 @@
 import {
-  PROJECTS, getProject,
   type Project, type ProjectType, type ProjectStatus, type Milestone,
 } from './projects';
 
 // Server-only Epic backend access (C-125). Calls the real Epic read-layer
 // (identity-service) via the gateway with the inter-service key, and maps the
-// backend rows to the frontend shape. Everything degrades to the curated sample so
-// the board is never blank / never 500s. NEW-A: the gateway URL is server-only
+// backend rows to the frontend shape. Real data end-to-end (C-135 §4): an
+// unreachable backend / no session resolves to `unavailable` (no projects) —
+// never a fabricated sample. NEW-A: the gateway URL is server-only
 // (API_GATEWAY_URL) — never shipped to the client.
 const GW = process.env.API_GATEWAY_URL ?? '';
 
@@ -35,10 +35,12 @@ export function projectFromBackend(p: Record<string, unknown>): Project {
   };
 }
 
-export interface ResolvedProjects { projects: Project[]; source: 'live' | 'sample'; }
+export interface ResolvedProjects { projects: Project[]; source: 'live' | 'unavailable'; }
 
-// The caller's OWN projects — live backend first, curated sample as fallback.
-// `owner` is derived from the session by the BFF (never a client param, P6).
+// The caller's OWN projects — live backend only. `owner` is derived from the session
+// by the BFF (never a client param, P6). No session or an unreachable backend
+// resolves to (projects: [], source: 'unavailable') so the page shows an honest
+// empty state — never a fabricated sample (C-135 §4).
 export async function resolveOwnProjects(owner: string | null): Promise<ResolvedProjects> {
   if (GW && owner) {
     try {
@@ -49,15 +51,16 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
         const rows = (await res.json().catch(() => ({})))?.data?.projects;
         if (Array.isArray(rows)) return { projects: rows.map((p) => projectFromBackend(p as Record<string, unknown>)), source: 'live' };
       }
-    } catch { /* fall through to the curated sample */ }
+    } catch { /* unreachable → unavailable below */ }
   }
-  return { projects: PROJECTS, source: 'sample' };
+  return { projects: [], source: 'unavailable' };
 }
 
-export interface ResolvedProject { project: Project | null; source: 'live' | 'sample'; }
+export interface ResolvedProject { project: Project | null; source: 'live' | 'unavailable'; }
 
-// One project by id — live backend first, sample fallback. A live 404 is
-// authoritative (project: null, source: 'live').
+// One project by id — live backend only. A live 404 is authoritative (project: null,
+// source: 'live'); an unreachable backend resolves to (project: null, source:
+// 'unavailable'). Never a fabricated sample.
 export async function resolveProject(id: string): Promise<ResolvedProject> {
   if (GW) {
     try {
@@ -69,7 +72,7 @@ export async function resolveProject(id: string): Promise<ResolvedProject> {
         if (p) return { project: projectFromBackend(p as Record<string, unknown>), source: 'live' };
       }
       if (res.status === 404) return { project: null, source: 'live' };
-    } catch { /* fall through to the curated sample */ }
+    } catch { /* unreachable → unavailable below */ }
   }
-  return { project: getProject(id), source: 'sample' };
+  return { project: null, source: 'unavailable' };
 }

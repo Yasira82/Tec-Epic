@@ -7,19 +7,28 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
-import { PROJECTS, TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
+import { TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
 import EpicPro from './components/EpicPro';
 
 export default function EpicHome() {
-  // The caller's OWN projects — fetched from the BFF (identity from the session
-  // cookie, P6), falling back to the curated sample so the board is never blank.
-  const [projects, setProjects] = useState<Project[]>(PROJECTS);
+  // Real data end-to-end (C-135 §4): the caller's OWN projects (identity from the
+  // session cookie, P6) or an honest empty state — never a fabricated sample.
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
   useEffect(() => {
     let alive = true;
     fetch('/api/bff/epic/projects', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (alive && Array.isArray(d?.projects)) setProjects(d.projects); })
-      .catch(() => { /* keep the sample */ });
+      .then((d) => {
+        if (!alive) return;
+        if (d && d.source === 'live' && Array.isArray(d.projects)) {
+          setProjects(d.projects);
+          setStatus('ready');
+        } else {
+          setStatus('unavailable');
+        }
+      })
+      .catch(() => { if (alive) setStatus('unavailable'); });
     return () => { alive = false; };
   }, []);
 
@@ -46,6 +55,31 @@ export default function EpicHome() {
 
         {/* Project board */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 12 }}>Projects</h2>
+
+        {status === 'loading' && (
+          <div style={{ padding: 30, textAlign: 'center', opacity: 0.6, fontSize: 14 }}>Loading your projects…</div>
+        )}
+        {status === 'unavailable' && (
+          <div style={{ padding: '36px 24px', background: TEC_COLORS.surface, borderRadius: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 26 }}>🚀</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>No projects yet</div>
+            <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
+              Sign in with Pi to see the projects you&apos;re building. Create one to start the
+              Epic → Zone → activity → Legend journey — it appears here once you do.
+            </p>
+          </div>
+        )}
+        {status === 'ready' && projects.length === 0 && (
+          <div style={{ padding: '36px 24px', background: TEC_COLORS.surface, borderRadius: 12, textAlign: 'center' }}>
+            <div style={{ fontSize: 26 }}>🚀</div>
+            <div style={{ color: '#e7e7ea', fontWeight: 800, marginTop: 8 }}>Nothing built yet</div>
+            <p style={{ opacity: 0.65, fontSize: 13, lineHeight: 1.6, maxWidth: 420, margin: '8px auto 0' }}>
+              You haven&apos;t created a project yet. Start one to begin the Epic → Zone → activity → Legend journey.
+            </p>
+          </div>
+        )}
+
+        {status === 'ready' && projects.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 14 }}>
           {projects.map((p) => {
             const t = TYPE_META[p.type]; const s = STATUS_META[p.status];
@@ -69,11 +103,12 @@ export default function EpicHome() {
             );
           })}
         </div>
+        )}
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           <strong>Boundary (C-125).</strong> Epic owns project creation + lifecycle. It never verifies
           (Zone), moves capital (FundX), records reputation (Legend), or processes transactions
-          (Commerce/payment-service) — it coordinates them by ID. This preview is a read-only sample.
+          (Commerce/payment-service) — it coordinates them by ID.
         </p>
 
         {/* Epic Pro */}
