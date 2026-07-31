@@ -28,7 +28,7 @@ slug / legal + a themed **project board** (sample projects · type · lifecycle 
 Zone-verified · funding) + a `/project/[id]` detail (lifecycle pipeline +
 milestones + FundX-presented funding) + **Epic Pro** (the Pi Portal "Process a
 Transaction" gate). Real project creation / funding is Phase 2 (gated on Zone +
-FundX + Connection live). Not yet deployed.
+FundX + Connection live). Deployed (Mainnet) · Pi App ID registered · env set · payment live · referral growth loop wired (C-133).
 
 ---
 
@@ -38,7 +38,7 @@ FundX + Connection live). Not yet deployed.
 |-------|-------|
 | **App** | TEC Epic |
 | **Domain** | `https://epic.tecosystem.app` |
-| **Pi App ID** | ⏳ TBD — register at Pi Developer Portal · then Vercel `NEXT_PUBLIC_PI_APP_ID` |
+| **Pi App ID** | ✅ Registered (Mainnet) · Vercel `NEXT_PUBLIC_PI_APP_ID` |
 | **APP_SOURCE slug** | `epic` (payment-service resolves `PI_API_KEY_EPIC`) |
 | **PI_SANDBOX** | `false` (Mainnet) |
 
@@ -126,6 +126,10 @@ Epic V0/V1 — Creation preview (customized from template):
   ✅ NEW-A: no NEXT_PUBLIC_API_GATEWAY_URL / Railway host in the client bundle
   ✅ /app themed: project board (sample) + Epic→Zone→Legend pipeline + Epic Pro (real Pi U2A)
   ✅ /project/[id] detail (lifecycle + milestones + FundX-presented funding) + BFF /api/bff/epic/projects
+  ✅ VALUE CHAIN (C-121): "Mark project complete → Legend" — owner-scoped write path
+     (BFF /api/bff/epic/complete derives owner from session, P6) → backend graduates
+     the project to LEGEND + emits epic.project.completed.v1 → Legend records the
+     achievement (create → earn). Epic never records reputation itself.
 
 Next (before live):
   □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
