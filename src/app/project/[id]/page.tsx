@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
 import { resolveProject } from '@/lib/epic/server';
+import CompleteProjectButton from '@/components/epic/CompleteProjectButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,6 +92,10 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
             </li>
           ))}
         </ul>
+
+        {/* Value chain (C-125): completing graduates the project to Legend. Shown for
+            the owner's non-terminal projects; the backend enforces owner-scope. */}
+        {p.status !== 'LEGEND' && <CompleteProjectButton slug={p.id} />}
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           Verification is minted by Zone, funding executed by FundX, and completion recorded in Legend —

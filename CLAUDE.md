@@ -126,6 +126,10 @@ Epic V0/V1 — Creation preview (customized from template):
   ✅ NEW-A: no NEXT_PUBLIC_API_GATEWAY_URL / Railway host in the client bundle
   ✅ /app themed: project board (sample) + Epic→Zone→Legend pipeline + Epic Pro (real Pi U2A)
   ✅ /project/[id] detail (lifecycle + milestones + FundX-presented funding) + BFF /api/bff/epic/projects
+  ✅ VALUE CHAIN (C-121): "Mark project complete → Legend" — owner-scoped write path
+     (BFF /api/bff/epic/complete derives owner from session, P6) → backend graduates
+     the project to LEGEND + emits epic.project.completed.v1 → Legend records the
+     achievement (create → earn). Epic never records reputation itself.
 
 Next (before live):
   □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +

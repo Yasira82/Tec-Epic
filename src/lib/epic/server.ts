@@ -56,6 +56,45 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
   return { projects: [], source: 'unavailable' };
 }
 
+export interface CompleteResult {
+  ok: boolean;
+  status: number;
+  project?: Project;
+  error?: string;
+}
+
+// Complete the caller's OWN project (value chain → Legend, C-125). `owner` is derived
+// from the session by the BFF (never a client field, P6); the backend enforces
+// owner-scope + terminal-state. A completed project graduates to LEGEND and the
+// backend emits epic.project.completed.v1 so Legend records the achievement (create →
+// earn). Returns the backend status so the UI can show an honest message
+// (401 no session · 403 not yours · 409 already complete · 503 unreachable).
+export async function completeProject(owner: string | null, slug: string): Promise<CompleteResult> {
+  if (!owner) return { ok: false, status: 401, error: 'Sign in to complete your project.' };
+  if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  try {
+    const res = await fetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/complete`, {
+      method:  'POST',
+      headers: gwHeaders(),
+      body:    JSON.stringify({ owner }),
+      cache:   'no-store',
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (res.ok) {
+      const p = (json?.data as Record<string, unknown> | undefined)?.project;
+      return { ok: true, status: 200, project: p ? projectFromBackend(p as Record<string, unknown>) : undefined };
+    }
+    // Map backend errors to a caller-safe message (never leak internal detail).
+    const msg = res.status === 403 ? 'This is not your project.'
+      : res.status === 404 ? 'Project not found.'
+      : res.status === 400 || res.status === 409 ? 'This project is already completed.'
+      : 'Could not complete the project. Please try again.';
+    return { ok: false, status: res.status, error: msg };
+  } catch {
+    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  }
+}
+
 export interface ResolvedProject { project: Project | null; source: 'live' | 'unavailable'; }
 
 // One project by id — live backend only. A live 404 is authoritative (project: null,
