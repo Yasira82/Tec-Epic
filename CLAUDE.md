@@ -124,8 +124,12 @@ Epic V0/V1 — Creation preview (customized from template):
   ✅ sso-callback ALLOWED_AUDIENCES → epic.tecosystem.app + tec-epic.vercel.app
   ✅ privacy + terms → TEC Epic / epic.tecosystem.app
   ✅ NEW-A: no NEXT_PUBLIC_API_GATEWAY_URL / Railway host in the client bundle
-  ✅ /app themed: project board (sample) + Epic→Zone→Legend pipeline + Epic Pro (real Pi U2A)
+  ✅ /app themed: project board + Epic→Zone→Legend pipeline + Epic Pro (real Pi U2A)
   ✅ /project/[id] detail (lifecycle + milestones + FundX-presented funding) + BFF /api/bff/epic/projects
+  ✅ CREATE a project (C-125 — Epic owns creation): CreateProject form on the board →
+     POST /api/bff/epic/projects → backend EpicService.createProject (DRAFT/unverified/
+     unfunded, unique slug, owner = session identity — P6). Turns Epic from read-only
+     into a real create surface; the new project is completable → Legend (create → earn).
   ✅ VALUE CHAIN (C-121): "Mark project complete → Legend" — owner-scoped write path
      (BFF /api/bff/epic/complete derives owner from session, P6) → backend graduates
      the project to LEGEND + emits epic.project.completed.v1 → Legend records the
