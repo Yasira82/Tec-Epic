@@ -8,14 +8,12 @@
 // the new project is handed back to the board so it appears immediately, and the
 // pioneer can drive it to completion → Legend (create → earn).
 import { useState } from 'react';
-import { usePiAuth } from '@yasser172/tec-auth';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, type Project, type ProjectType } from '@/lib/epic/projects';
 
 const TYPES = Object.keys(TYPE_META) as ProjectType[];
 
 export default function CreateProject({ onCreated }: { onCreated: (p: Project) => void }) {
-  const { isAuthenticated } = usePiAuth();
   const [open, setOpen]         = useState(false);
   const [type, setType]         = useState<ProjectType>('STARTUP');
   const [name, setName]         = useState('');
@@ -24,9 +22,12 @@ export default function CreateProject({ onCreated }: { onCreated: (p: Project) =
   const [phase, setPhase]       = useState<'idle' | 'busy' | 'error'>('idle');
   const [msg, setMsg]           = useState('');
 
-  // Public browsing is allowed (C-125), but creating requires a session. Rather than
-  // fail on submit, we only show the "New project" affordance to signed-in pioneers.
-  if (!isAuthenticated) return null;
+  // The affordance is ALWAYS shown (public browsing is allowed, C-125). We do NOT gate
+  // on a client-side auth flag — in Pi Browser that flag is unreliable (the C-123
+  // cookie/session saga), so gating here would hide "Start a project" from a genuinely
+  // signed-in pioneer. Authorization is enforced where it's reliable: the BFF derives
+  // identity from the session cookie server-side and returns 401 with an honest "Sign
+  // in to create a project" when there's no session (fail closed at the server, P6).
 
   async function submit() {
     const n = name.trim();
