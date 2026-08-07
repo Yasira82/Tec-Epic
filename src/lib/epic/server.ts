@@ -56,6 +56,45 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
   return { projects: [], source: 'unavailable' };
 }
 
+export interface CreateResult {
+  ok: boolean;
+  status: number;
+  project?: Project;
+  error?: string;
+}
+
+// Create the caller's OWN project (C-125 — Epic owns creation). `owner` is derived
+// from the session by the BFF (never a client field, P6); the backend validates the
+// type + name and starts the project at DRAFT/unverified/unfunded. Returns the backend
+// status so the UI can show an honest message (401 no session · 400 bad input · 503
+// unreachable). Zone still verifies and FundX still funds — Epic only owns creation.
+export async function createProject(
+  owner: string | null,
+  input: { type: string; name: string; tagline?: string; category?: string },
+): Promise<CreateResult> {
+  if (!owner) return { ok: false, status: 401, error: 'Sign in to create a project.' };
+  if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  try {
+    const res = await fetch(`${GW}/api/identity/epic/project`, {
+      method:  'POST',
+      headers: gwHeaders(),
+      body:    JSON.stringify({ owner, ...input }),
+      cache:   'no-store',
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (res.ok) {
+      const p = (json?.data as Record<string, unknown> | undefined)?.project;
+      return { ok: true, status: 201, project: p ? projectFromBackend(p as Record<string, unknown>) : undefined };
+    }
+    const msg = res.status === 400
+      ? String((json as { message?: string })?.message ?? 'Please check the name and type.')
+      : 'Could not create the project. Please try again.';
+    return { ok: false, status: res.status, error: msg };
+  } catch {
+    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  }
+}
+
 export interface CompleteResult {
   ok: boolean;
   status: number;
