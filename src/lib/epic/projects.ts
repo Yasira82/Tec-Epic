@@ -22,6 +22,7 @@ export interface Milestone {
 
 export interface Project {
   id:           string;
+  owner?:       string;          // creator's Pi username (public) — used to gate owner-only edits
   type:         ProjectType;
   name:         string;
   tagline:      string;

@@ -2,11 +2,28 @@
 // Epic read-layer — real data end-to-end (C-135 §4): a live 404 is "not found"; an
 // unreachable backend is an honest "couldn't load". Never a fabricated sample.
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
 import { resolveProject } from '@/lib/epic/server';
 import CompleteProjectButton from '@/components/epic/CompleteProjectButton';
+import MilestonesEditor from '@/components/epic/MilestonesEditor';
+
+// Reliable owner check: the session cookie is read SERVER-SIDE (unlike the client-side
+// auth flag, which is unreliable in Pi Browser — the C-123 saga). Only the owner of a
+// non-terminal project gets the interactive milestone editor; everyone else (public
+// viewers) sees the read-only list.
+async function viewerUsername(): Promise<string | null> {
+  try {
+    const raw = (await cookies()).get('tec_user')?.value ?? '';
+    if (!raw) return null;
+    let u: Record<string, unknown>;
+    try { u = JSON.parse(raw); } catch { u = JSON.parse(decodeURIComponent(raw)); }
+    const name = (u.piUsername ?? u.username) as string | undefined;
+    return name && name.trim() ? name : null;
+  } catch { return null; }
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +50,9 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
   const t = TYPE_META[p.type];
   const s = STATUS_META[p.status];
   const stageIdx = STATUS_ORDER.indexOf(p.status);
+  const viewer = await viewerUsername();
+  const isOwner = !!viewer && !!p.owner && viewer === p.owner;
+  const canEditMilestones = isOwner && p.status !== 'LEGEND';
 
   return (
     <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
@@ -82,20 +102,30 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
           </div>
         )}
 
-        {/* Milestones */}
+        {/* Milestones — interactive for the owner (add + check off), read-only for
+            everyone else. Epic owns project structure (C-125). */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 15, marginTop: 24 }}>Milestones</h2>
-        <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-          {p.milestones.map((m, i) => (
-            <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 0', opacity: m.done ? 1 : 0.6 }}>
-              <span>{m.done ? '✅' : '⬜'}</span>
-              <span style={{ textDecoration: m.done ? 'line-through' : 'none' }}>{m.title}</span>
-            </li>
-          ))}
-        </ul>
+        <div style={{ marginTop: 8 }}>
+          {canEditMilestones ? (
+            <MilestonesEditor slug={p.id} initial={p.milestones} />
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {p.milestones.length === 0 && (
+                <li style={{ opacity: 0.6, fontSize: 13, padding: '4px 0' }}>No milestones yet.</li>
+              )}
+              {p.milestones.map((m, i) => (
+                <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 0', opacity: m.done ? 1 : 0.6 }}>
+                  <span>{m.done ? '✅' : '⬜'}</span>
+                  <span style={{ textDecoration: m.done ? 'line-through' : 'none' }}>{m.title}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {/* Value chain (C-125): completing graduates the project to Legend. Shown for
             the owner's non-terminal projects; the backend enforces owner-scope. */}
-        {p.status !== 'LEGEND' && <CompleteProjectButton slug={p.id} />}
+        {isOwner && p.status !== 'LEGEND' && <CompleteProjectButton slug={p.id} />}
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           Verification is minted by Zone, funding executed by FundX, and completion recorded in Legend —

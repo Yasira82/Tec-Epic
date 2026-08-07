@@ -22,6 +22,7 @@ export function projectFromBackend(p: Record<string, unknown>): Project {
   const ms = Array.isArray(p.milestones) ? (p.milestones as Record<string, unknown>[]) : [];
   return {
     id:           String(p.slug ?? ''),
+    owner:        p.owner ? String(p.owner) : undefined,
     type:         String(p.type ?? '') as ProjectType,
     name:         String(p.name ?? ''),
     tagline:      String(p.tagline ?? ''),
@@ -94,6 +95,49 @@ export async function createProject(
     return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
   }
 }
+
+// ── Milestone management (the owner tracks their own project — C-125) ──────────
+export interface MilestoneResult {
+  ok: boolean;
+  status: number;
+  project?: Project;
+  error?: string;
+}
+
+async function milestoneCall(
+  owner: string | null, slug: string, method: 'POST' | 'PATCH', body: Record<string, unknown>,
+): Promise<MilestoneResult> {
+  if (!owner) return { ok: false, status: 401, error: 'Sign in to edit your project.' };
+  if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  try {
+    const res = await fetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/milestone`, {
+      method,
+      headers: gwHeaders(),
+      body:    JSON.stringify({ owner, ...body }),
+      cache:   'no-store',
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (res.ok) {
+      const p = (json?.data as Record<string, unknown> | undefined)?.project;
+      return { ok: true, status: 200, project: p ? projectFromBackend(p as Record<string, unknown>) : undefined };
+    }
+    const msg = res.status === 403 ? 'This is not your project.'
+      : res.status === 404 ? 'Project not found.'
+      : res.status === 400 ? String((json as { message?: string })?.message ?? 'Please check your input.')
+      : 'Could not update the milestone. Please try again.';
+    return { ok: false, status: res.status, error: msg };
+  } catch {
+    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
+  }
+}
+
+/** Add a milestone to the caller's OWN project (owner resolved by the BFF — P6). */
+export const addMilestone = (owner: string | null, slug: string, title: string) =>
+  milestoneCall(owner, slug, 'POST', { title });
+
+/** Toggle a milestone's done state on the caller's OWN project (P6). */
+export const setMilestoneDone = (owner: string | null, slug: string, index: number, done: boolean) =>
+  milestoneCall(owner, slug, 'PATCH', { index, done });
 
 export interface CompleteResult {
   ok: boolean;
