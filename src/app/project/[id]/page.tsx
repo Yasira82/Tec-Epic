@@ -6,23 +6,26 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, STATUS_ORDER } from '@/lib/epic/projects';
-import { resolveProject } from '@/lib/epic/server';
+import { resolveProject, zoneStatusForName } from '@/lib/epic/server';
 import CompleteProjectButton from '@/components/epic/CompleteProjectButton';
 import MilestonesEditor from '@/components/epic/MilestonesEditor';
+import RequestZoneVerification from '@/components/epic/RequestZoneVerification';
 
-// Reliable owner check: the session cookie is read SERVER-SIDE (unlike the client-side
+// Reliable owner check: the session cookies are read SERVER-SIDE (unlike the client-side
 // auth flag, which is unreliable in Pi Browser — the C-123 saga). Only the owner of a
 // non-terminal project gets the interactive milestone editor; everyone else (public
-// viewers) sees the read-only list.
-async function viewerUsername(): Promise<string | null> {
+// viewers) sees the read-only list. The JWT is forwarded to Zone for verification.
+async function session(): Promise<{ username: string | null; token: string | null }> {
   try {
-    const raw = (await cookies()).get('tec_user')?.value ?? '';
-    if (!raw) return null;
+    const jar = await cookies();
+    const token = jar.get('tec_access_token')?.value ?? null;
+    const raw = jar.get('tec_user')?.value ?? '';
+    if (!raw) return { username: null, token };
     let u: Record<string, unknown>;
     try { u = JSON.parse(raw); } catch { u = JSON.parse(decodeURIComponent(raw)); }
     const name = (u.piUsername ?? u.username) as string | undefined;
-    return name && name.trim() ? name : null;
-  } catch { return null; }
+    return { username: name && name.trim() ? name : null, token };
+  } catch { return { username: null, token: null }; }
 }
 
 export const dynamic = 'force-dynamic';
@@ -50,9 +53,12 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
   const t = TYPE_META[p.type];
   const s = STATUS_META[p.status];
   const stageIdx = STATUS_ORDER.indexOf(p.status);
-  const viewer = await viewerUsername();
+  const { username: viewer, token } = await session();
   const isOwner = !!viewer && !!p.owner && viewer === p.owner;
   const canEditMilestones = isOwner && p.status !== 'LEGEND';
+  // Live Zone status for the owner (C-121 create → verify). Epic presents Zone's
+  // verdict; it never mints it (C-125). null = not submitted yet.
+  const zone = isOwner ? await zoneStatusForName(token, p.name) : null;
 
   return (
     <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
@@ -99,6 +105,32 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
             <div style={{ height: 8, background: '#ffffff14', borderRadius: 8 }}>
               <div style={{ height: 8, width: `${p.fundedPct ?? 0}%`, background: TEC_COLORS.goldDark, borderRadius: 8 }} />
             </div>
+          </div>
+        )}
+
+        {/* Verification (Zone) — owner-only. Epic asks Zone; Zone decides (C-121 /
+            C-125). Live status from Zone: verified · pending · request. */}
+        {isOwner && (
+          <div style={{ marginTop: 24 }}>
+            <h2 style={{ color: TEC_COLORS.gold, fontSize: 15, margin: 0 }}>Verification</h2>
+            {zone?.status === 'VERIFIED' ? (
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: TEC_COLORS.success }}>
+                <span>🛡️</span><span>Zone Verified — confirmed by a human reviewer.</span>
+              </div>
+            ) : zone?.status === 'PENDING' ? (
+              <div style={{ marginTop: 10, fontSize: 13, opacity: 0.8, lineHeight: 1.5 }}>
+                ⏳ Verification pending Zone review — a reviewer will confirm the evidence. “Zone Verified” is earned, never bought (C-120).
+              </div>
+            ) : (
+              <>
+                {zone?.status === 'REVOKED' && (
+                  <div style={{ marginTop: 10, fontSize: 12.5, color: TEC_COLORS.error }}>
+                    A previous Zone request was revoked. You can submit again below.
+                  </div>
+                )}
+                <RequestZoneVerification slug={p.id} />
+              </>
+            )}
           </div>
         )}
 
