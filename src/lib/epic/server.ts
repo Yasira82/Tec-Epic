@@ -178,6 +178,69 @@ export async function completeProject(owner: string | null, slug: string): Promi
   }
 }
 
+// ── Epic → Zone (C-121 "create → verify") ─────────────────────────────────────
+// Epic never mints verification (C-125). To get an Epic project verified, the OWNER
+// asks Zone — we call Zone's OWN gateway API (POST /identity/zone/verification) and
+// forward the user's JWT so Zone attributes the request to the verified session
+// identity (P6). This is a clean service-API seam (C-132) — no cross-module DB read.
+// Zone starts the request PENDING (a submitter can never self-verify, C-120 §7).
+const zoneHeaders = (token: string): Record<string, string> => ({
+  'Content-Type': 'application/json',
+  'x-request-id': crypto.randomUUID(),
+  Authorization:  `Bearer ${token}`,
+  ...(process.env.INTERNAL_SECRET && { 'x-internal-key': process.env.INTERNAL_SECRET }),
+});
+
+export interface ZoneRequestResult { ok: boolean; status: number; handle?: string; error?: string; }
+
+/** Ask Zone to verify a project (owner forwards their JWT). Zone starts it PENDING. */
+export async function requestZoneVerification(
+  token: string | null, name: string, summary?: string,
+): Promise<ZoneRequestResult> {
+  if (!token) return { ok: false, status: 401, error: 'Sign in to request verification.' };
+  if (!GW)    return { ok: false, status: 503, error: 'Zone is unavailable right now.' };
+  try {
+    const res = await fetch(`${GW}/api/identity/zone/verification`, {
+      method:  'POST',
+      headers: zoneHeaders(token),
+      body:    JSON.stringify({ type: 'PROJECT', name, summary, note: `Epic project "${name}" submitted for Zone verification.` }),
+      cache:   'no-store',
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (res.ok) {
+      const handle = ((json?.data as Record<string, unknown> | undefined)?.entity as Record<string, unknown> | undefined)?.handle;
+      return { ok: true, status: 200, handle: handle ? String(handle) : undefined };
+    }
+    const msg = res.status === 409 ? 'You already have a pending Zone request — one at a time.'
+      : res.status === 401 ? 'Sign in to request verification.'
+      : res.status === 400 ? 'Please check the project details.'
+      : 'Could not reach Zone. Please try again.';
+    return { ok: false, status: res.status, error: msg };
+  } catch {
+    return { ok: false, status: 503, error: 'Zone is unavailable right now.' };
+  }
+}
+
+export type ZoneStatus = 'PENDING' | 'VERIFIED' | 'REVOKED';
+export interface ZoneSubmissionStatus { status: ZoneStatus; handle: string; }
+
+/** The Zone status of the caller's submission that matches this project name (or null). */
+export async function zoneStatusForName(
+  token: string | null, name: string,
+): Promise<ZoneSubmissionStatus | null> {
+  if (!token || !GW || !name.trim()) return null;
+  try {
+    const res = await fetch(`${GW}/api/identity/zone/my/submissions`, {
+      headers: zoneHeaders(token), cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const rows = ((await res.json().catch(() => ({})))?.data?.submissions ?? []) as Record<string, unknown>[];
+    const match = rows.find((r) => String(r.name ?? '').trim().toLowerCase() === name.trim().toLowerCase());
+    if (!match) return null;
+    return { status: String(match.status ?? 'PENDING').toUpperCase() as ZoneStatus, handle: String(match.handle ?? '') };
+  } catch { return null; }
+}
+
 export interface ResolvedProject { project: Project | null; source: 'live' | 'unavailable'; }
 
 // One project by id — live backend only. A live 404 is authoritative (project: null,
