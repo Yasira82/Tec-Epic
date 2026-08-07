@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
 import EpicPro from './components/EpicPro';
+import CreateProject from '@/components/epic/CreateProject';
 
 export default function EpicHome() {
   // Real data end-to-end (C-135 §4): the caller's OWN projects (identity from the
@@ -33,6 +34,13 @@ export default function EpicHome() {
     return () => { alive = false; };
   }, []);
 
+  // A newly created project (owner = the session) appears immediately at the top —
+  // it comes back DRAFT from the backend, so the board reflects real state at once.
+  const handleCreated = (p: Project) => {
+    setProjects((prev) => [p, ...prev.filter((x) => x.id !== p.id)]);
+    setStatus('ready');
+  };
+
   return (
     <main style={{ minHeight: '100vh', background: TEC_COLORS.bg, color: '#e7e7ea', padding: '32px 22px', fontFamily: 'system-ui, sans-serif' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -55,7 +63,12 @@ export default function EpicHome() {
         </div>
 
         {/* Project board */}
-        <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 12 }}>Projects</h2>
+        <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 28, marginBottom: 4 }}>Projects</h2>
+
+        {/* Create — the answer to "What are you building?" (signed-in only, C-125). */}
+        <CreateProject onCreated={handleCreated} />
+
+        <div style={{ height: 12 }} />
 
         {status === 'loading' && (
           <div style={{ padding: 30, textAlign: 'center', opacity: 0.6, fontSize: 14 }}>Loading your projects…</div>
