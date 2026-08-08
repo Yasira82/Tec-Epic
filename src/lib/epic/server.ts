@@ -30,6 +30,7 @@ export function projectFromBackend(p: Record<string, unknown>): Project {
     team:         Number(p.team ?? 1),
     status:       String(p.status ?? 'DRAFT') as ProjectStatus,
     zoneVerified: Boolean(p.zone_verified),
+    featured:     Boolean(p.featured),
     fundingGoal:  p.funding_goal == null ? undefined : Number(p.funding_goal),
     fundedPct:    p.funded_pct == null ? undefined : Number(p.funded_pct),
     milestones:   ms.map((m): Milestone => ({ title: String(m.title ?? ''), done: Boolean(m.done) })),
@@ -55,6 +56,54 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
     } catch { /* unreachable → unavailable below */ }
   }
   return { projects: [], source: 'unavailable' };
+}
+
+// The caller's LIVE Epic-Pro entitlement — read from commerce (the Subscription owner,
+// C-47) with the session JWT. Epic never STORES billing (P5); it only reflects it to gate
+// the FEATURED benefit. Pro only while the period is live. Any failure → false (fail closed).
+export async function resolveProStatus(token: string | null): Promise<boolean> {
+  if (!GW || !token) return false;
+  try {
+    const res = await fetch(`${GW}/api/commerce/subscriptions/status`, {
+      headers: { ...gwHeaders(), Authorization: `Bearer ${token}` }, cache: 'no-store',
+    });
+    if (!res.ok) return false;
+    const d = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const s = (d.data ?? d) as Record<string, unknown>;
+    const plan = String(s.plan ?? s.tier ?? '').toUpperCase();
+    const active  = s.isActive === true || s.active === true || (plan !== '' && plan !== 'FREE');
+    const expired = s.isExpired === true;
+    const end     = s.current_period_end ?? s.currentPeriodEnd ?? s.expires_at;
+    const notExpired = !expired && (!end || new Date(String(end)).getTime() > Date.now());
+    return active && notExpired && plan !== '' && plan !== 'FREE';
+  } catch { return false; }
+}
+
+// Epic Pro — sync the FEATURED flag on all the owner's projects to match their live Pro
+// (visibility only, never verification). `owner` is derived from the session by the BFF
+// (P6). Best-effort: a failure never blocks the board read.
+export async function setFeaturedForOwner(owner: string | null, on: boolean): Promise<boolean> {
+  if (!GW || !owner) return false;
+  try {
+    const res = await fetch(`${GW}/api/identity/epic/featured`, {
+      method: 'PATCH', headers: gwHeaders(), body: JSON.stringify({ owner, featured: on }), cache: 'no-store',
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
+// PUBLIC project directory (C-125) — the Pi community browses launched projects. No auth
+// (the internal key authorizes the gateway hop). Trust-first + featured order is the
+// backend's; an unreachable backend → empty (honest). Optional category filter.
+export async function resolveDiscover(category?: string): Promise<Project[]> {
+  if (!GW) return [];
+  try {
+    const q = category && category.trim() ? `?category=${encodeURIComponent(category.trim())}` : '';
+    const res = await fetch(`${GW}/api/identity/epic/discover${q}`, { headers: gwHeaders(), cache: 'no-store' });
+    if (!res.ok) return [];
+    const rows = (await res.json().catch(() => ({})))?.data?.projects;
+    return Array.isArray(rows) ? rows.map((p) => projectFromBackend(p as Record<string, unknown>)) : [];
+  } catch { return []; }
 }
 
 export interface CreateResult {

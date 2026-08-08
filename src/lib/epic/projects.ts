@@ -30,6 +30,8 @@ export interface Project {
   team:         number;          // team size
   status:       ProjectStatus;
   zoneVerified: boolean;         // presented from Zone — Epic never self-verifies
+  featured?:    boolean;         // Epic Pro — featured in the public directory (visibility only,
+                                 // ranks BELOW zoneVerified; never affects verification)
   fundingGoal?: number;          // π — optional FundX integration
   fundedPct?:   number;          // 0-100, presented from FundX
   milestones:   Milestone[];
