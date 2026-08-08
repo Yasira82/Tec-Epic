@@ -90,7 +90,7 @@ export default function EpicPro() {
         <span style={{ color: TEC_COLORS.gold, fontWeight: 800 }}>π 10<span style={{ opacity: 0.6, fontSize: 12, fontWeight: 500 }}>/mo</span></span>
       </div>
       <p style={{ opacity: 0.75, fontSize: 13, margin: '8px 0 14px' }}>
-<strong style={{ color: TEC_COLORS.gold }}>⭐ Featured</strong> placement in public discovery · your projects rank higher (never above Zone-verified) · more reach for what you build.
+<strong style={{ color: TEC_COLORS.gold }}>📊 Portfolio insights</strong> — a founder dashboard of your own projects (completion, milestones, Legend outcomes) · plus a <strong style={{ color: TEC_COLORS.gold }}>⭐ Featured</strong> placement in public discovery (never above Zone-verified). Reach + insight, never verification.
       </p>
       <button
         onClick={handleSubscribe}

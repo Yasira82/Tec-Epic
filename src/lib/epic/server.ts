@@ -79,6 +79,30 @@ export async function resolveProStatus(token: string | null): Promise<boolean> {
   } catch { return false; }
 }
 
+// Epic Pro — Portfolio Insights: the aggregate of the owner's OWN projects (C-125). A
+// genuine standalone dashboard (own data, no population needed). `owner` is the session
+// identity resolved by the BFF (P6); the BFF gates this behind live Pro (P5). null on
+// unreachable / no session.
+export interface PortfolioInsights {
+  total: number;
+  byStatus: Record<string, number>;
+  completed: number;
+  completionRate: number;
+  legendOutcomes: number;
+  zoneVerified: number;
+  milestones: { total: number; done: number; pct: number };
+  funding: { goalSum: number; avgFundedPct: number };
+}
+export async function resolveInsights(owner: string | null): Promise<PortfolioInsights | null> {
+  if (!GW || !owner) return null;
+  try {
+    const res = await fetch(`${GW}/api/identity/epic/insights/${encodeURIComponent(owner)}`, { headers: gwHeaders(), cache: 'no-store' });
+    if (!res.ok) return null;
+    const insights = (await res.json().catch(() => ({})))?.data?.insights;
+    return insights ?? null;
+  } catch { return null; }
+}
+
 // Epic Pro — sync the FEATURED flag on all the owner's projects to match their live Pro
 // (visibility only, never verification). `owner` is derived from the session by the BFF
 // (P6). Best-effort: a failure never blocks the board read.
