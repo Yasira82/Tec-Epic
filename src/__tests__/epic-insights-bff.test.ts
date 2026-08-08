@@ -34,7 +34,7 @@ describe('GET /api/bff/epic/insights (Pro Portfolio Insights, gated)', () => {
 
   it('non-Pro → { pro:false } and NEVER fetches the insights aggregate (P5 gate)', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(ok({ data: { plan: 'FREE', isActive: true } })); // sub = not Pro
+      .mockResolvedValueOnce(ok({ data: { subscription: { plan: 'FREE', isActive: true } } })); // sub = not Pro
     const { GET } = await import('@/app/api/bff/epic/insights/route');
     const res  = await GET(makeReq({ tec_user: JSON.stringify({ piUsername: 'maya' }), tec_access_token: 'tok' }));
     const json = await res.json();
@@ -47,7 +47,7 @@ describe('GET /api/bff/epic/insights (Pro Portfolio Insights, gated)', () => {
 
   it('Pro → returns the owner’s portfolio insights', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(ok({ data: { plan: 'PRO', isActive: true, isExpired: false } }))                 // sub = Pro
+      .mockResolvedValueOnce(ok({ data: { subscription: { plan: 'PRO', isActive: true, isExpired: false } } }))                 // sub = Pro
       .mockResolvedValueOnce(ok({ data: { insights: { total: 3, completionRate: 67, legendOutcomes: 1 } } })); // insights
     const { GET } = await import('@/app/api/bff/epic/insights/route');
     const res  = await GET(makeReq({ tec_user: JSON.stringify({ piUsername: 'maya' }), tec_access_token: 'tok' }));
