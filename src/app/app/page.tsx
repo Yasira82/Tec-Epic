@@ -101,9 +101,12 @@ export default function EpicHome() {
             return (
               <Link key={p.id} href={`/project/${p.id}`} style={{ textDecoration: 'none' }}>
                 <div style={{ padding: 16, background: TEC_COLORS.surface, borderRadius: 12, border: '1px solid #ffffff10', height: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 20 }}>{t.icon}</span>
-                    <span style={{ fontSize: 11, color: s.tone, border: `1px solid ${s.tone}55`, borderRadius: 20, padding: '2px 8px' }}>{s.label}</span>
+                    <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {p.featured && <span style={{ fontSize: 10, color: TEC_COLORS.gold, border: `1px solid ${TEC_COLORS.gold}66`, borderRadius: 20, padding: '2px 7px' }}>⭐ Featured</span>}
+                      <span style={{ fontSize: 11, color: s.tone, border: `1px solid ${s.tone}55`, borderRadius: 20, padding: '2px 8px' }}>{s.label}</span>
+                    </span>
                   </div>
                   <div style={{ color: '#e7e7ea', fontWeight: 700, marginTop: 10 }}>{p.name}</div>
                   <div style={{ opacity: 0.65, fontSize: 12.5, marginTop: 6, lineHeight: 1.5 }}>{p.tagline}</div>
@@ -124,6 +127,13 @@ export default function EpicHome() {
           (Zone), moves capital (FundX), records reputation (Legend), or processes transactions
           (Commerce/payment-service) — it coordinates them by ID.
         </p>
+
+        {/* Public discovery — Epic reaches the whole Pi community */}
+        <div style={{ marginTop: 20 }}>
+          <Link href="/discover" style={{ fontSize: 13, color: TEC_COLORS.gold, textDecoration: 'none', border: `1px solid ${TEC_COLORS.gold}55`, borderRadius: 10, padding: '9px 16px', display: 'inline-block' }}>
+            🧭 Discover public Pi projects →
+          </Link>
+        </div>
 
         {/* Epic Pro */}
         <h2 style={{ color: TEC_COLORS.gold, fontSize: 16, marginTop: 32, marginBottom: 12 }}>Upgrade</h2>

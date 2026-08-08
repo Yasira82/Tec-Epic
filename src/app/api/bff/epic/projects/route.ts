@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveOwnProjects, createProject } from '@/lib/epic/server';
+import { resolveOwnProjects, createProject, resolveProStatus, setFeaturedForOwner } from '@/lib/epic/server';
 import { isE2eMode, e2eStub } from '@/lib/server/e2e-mode';
 
 // GET /api/bff/epic/projects — the project board (C-125), read-only.
@@ -23,8 +23,23 @@ function ownerFromSession(req: NextRequest): string | null {
 export async function GET(req: NextRequest) {
   const owner = ownerFromSession(req);
   const { projects, source } = await resolveOwnProjects(owner);
+
+  // Epic Pro — FEATURED sync (C-125). Reconcile the owner's projects' featured flag with
+  // their LIVE subscription (commerce-owned, P5). Featured is visibility ONLY (it ranks
+  // below zone_verified); a lapsed Pro clears it on the next board load. Best-effort:
+  // never blocks the read; only when the owner actually has projects.
+  let isPro = false;
+  if (owner && projects.length > 0) {
+    const token = req.cookies.get('tec_access_token')?.value ?? null;
+    isPro = await resolveProStatus(token);
+    if (projects.some((p) => Boolean(p.featured) !== isPro)) {
+      await setFeaturedForOwner(owner, isPro);          // reconcile persisted flags
+      projects.forEach((p) => { p.featured = isPro; }); // reflect immediately
+    }
+  }
+
   return NextResponse.json(
-    { source, projects },
+    { source, projects, isPro },
     { headers: { 'Cache-Control': 'private, max-age=60' } },
   );
 }

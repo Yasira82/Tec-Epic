@@ -1,9 +1,10 @@
 'use client';
 
 // EpicPro — the real Pi U2A payment surface (the Pi Portal "Process a
-// Transaction" gate). Epic Pro is a subscription (C-125 §Revenue: 10π/month):
-// unlimited projects, priority Zone verification, FundX integration, analytics.
-// Keeps the ADR-007 dual-mode guard.
+// Transaction" gate). Epic Pro is a subscription (C-125 §Revenue: 10π/month). The
+// REAL benefit is FEATURED placement in the public /discover directory (visibility
+// only — it ranks BELOW Zone-verified; Epic never sells verification). Keeps the
+// ADR-007 dual-mode guard.
 import { useEffect, useState } from 'react';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import {
@@ -89,7 +90,7 @@ export default function EpicPro() {
         <span style={{ color: TEC_COLORS.gold, fontWeight: 800 }}>π 10<span style={{ opacity: 0.6, fontSize: 12, fontWeight: 500 }}>/mo</span></span>
       </div>
       <p style={{ opacity: 0.75, fontSize: 13, margin: '8px 0 14px' }}>
-        Unlimited projects · priority Zone verification · FundX integration · analytics.
+<strong style={{ color: TEC_COLORS.gold }}>⭐ Featured</strong> placement in public discovery · your projects rank higher (never above Zone-verified) · more reach for what you build.
       </p>
       <button
         onClick={handleSubscribe}
