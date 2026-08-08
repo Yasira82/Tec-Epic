@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { TEC_COLORS } from '@yasser172/tec-ui';
 import { TYPE_META, STATUS_META, type Project } from '@/lib/epic/projects';
 import EpicPro from './components/EpicPro';
+import EpicInsights from './components/EpicInsights';
 import CreateProject from '@/components/epic/CreateProject';
 
 export default function EpicHome() {
@@ -121,6 +122,9 @@ export default function EpicHome() {
           })}
         </div>
         )}
+
+        {/* Portfolio Insights — Epic Pro founder dashboard (your own projects, standalone value) */}
+        <EpicInsights />
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           <strong>Boundary (C-125).</strong> Epic owns project creation + lifecycle. It never verifies
