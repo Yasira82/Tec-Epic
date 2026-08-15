@@ -49,7 +49,7 @@ export default function EpicHome() {
           <div style={{ fontSize: 34 }}>🚀</div>
           <h1 style={{ color: TEC_COLORS.gold, margin: '4px 0 2px', fontSize: 26 }}>TEC Epic</h1>
           <p style={{ opacity: 0.7, margin: 0, fontSize: 14 }}>
-            Creation Runtime — where the Pi economy builds new things. What are you building?
+            Where the Pi economy builds new things. What are you building?
           </p>
         </header>
 
@@ -127,9 +127,9 @@ export default function EpicHome() {
         <EpicInsights />
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
-          <strong>Boundary.</strong> Epic owns project creation + lifecycle. It never verifies
-          (Zone), moves capital (FundX), records reputation (Legend), or processes transactions
-          (Commerce/payment-service) — it coordinates them by ID.
+          <strong>How it works.</strong> Epic is where you create and grow your project.
+          Verification, funding, reputation, and payments are handled by their
+          dedicated apps — Epic brings them together in one place.
         </p>
 
         {/* Public discovery — Epic reaches the whole Pi community */}

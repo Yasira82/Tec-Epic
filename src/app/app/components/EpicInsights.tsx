@@ -99,7 +99,7 @@ export default function EpicInsights() {
           {data.funding.goalSum > 0 && (
             <div style={{ fontSize: 12, opacity: 0.75 }}>
               Funding targets: <strong style={{ color: TEC_COLORS.gold }}>{data.funding.goalSum}π</strong> · avg funded {data.funding.avgFundedPct}%
-              <span style={{ opacity: 0.6 }}> (presented from FundX — Epic never moves capital, C-125)</span>
+              <span style={{ opacity: 0.6 }}></span>
             </div>
           )}
         </div>

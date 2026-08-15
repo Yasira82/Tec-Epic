@@ -160,8 +160,8 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
         {isOwner && p.status !== 'LEGEND' && <CompleteProjectButton slug={p.id} />}
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
-          Verification is minted by Zone, funding executed by FundX, and completion recorded in Legend —
-          Epic presents them by ID and never re-derives them.
+          Verification, funding, and completed milestones are handled by their dedicated
+          apps and shown here together.
         </p>
       </div>
     </main>
