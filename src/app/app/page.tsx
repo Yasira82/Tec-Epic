@@ -127,7 +127,7 @@ export default function EpicHome() {
         <EpicInsights />
 
         <p style={{ opacity: 0.55, fontSize: 12, marginTop: 20, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
-          <strong>Boundary (C-125).</strong> Epic owns project creation + lifecycle. It never verifies
+          <strong>Boundary.</strong> Epic owns project creation + lifecycle. It never verifies
           (Zone), moves capital (FundX), records reputation (Legend), or processes transactions
           (Commerce/payment-service) — it coordinates them by ID.
         </p>

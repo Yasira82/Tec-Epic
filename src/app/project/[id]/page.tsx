@@ -119,7 +119,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
               </div>
             ) : zone?.status === 'PENDING' ? (
               <div style={{ marginTop: 10, fontSize: 13, opacity: 0.8, lineHeight: 1.5 }}>
-                ⏳ Verification pending Zone review — a reviewer will confirm the evidence. “Zone Verified” is earned, never bought (C-120).
+                ⏳ Verification pending Zone review — a reviewer will confirm the evidence. “Zone Verified” is earned, never bought.
               </div>
             ) : (
               <>
@@ -161,7 +161,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
 
         <p style={{ marginTop: 20, fontSize: 12, opacity: 0.55, lineHeight: 1.6, borderLeft: `2px solid ${TEC_COLORS.gold}55`, paddingLeft: 12 }}>
           Verification is minted by Zone, funding executed by FundX, and completion recorded in Legend —
-          Epic presents them by ID and never re-derives them (C-125).
+          Epic presents them by ID and never re-derives them.
         </p>
       </div>
     </main>

@@ -59,7 +59,7 @@ export default function EpicInsights() {
           <p style={{ opacity: 0.7, fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
             Epic Pro turns your projects into a portfolio: completion rate, milestone progress,
             Zone-verified count, Legend outcomes earned, and funding across everything you build —
-            your own data (C-125). Upgrade below to unlock.
+            your own data. Upgrade below to unlock.
           </p>
         </div>
       ) : data.total === 0 ? (
