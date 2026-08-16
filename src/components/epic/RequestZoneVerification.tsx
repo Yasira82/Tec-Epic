@@ -60,7 +60,7 @@ export default function RequestZoneVerification({ slug }: { slug: string }) {
       )}
       <p style={{ marginTop: 8, fontSize: 11.5, opacity: 0.55, lineHeight: 1.5 }}>
         Epic doesn’t verify — Zone does. Your request starts pending and a human reviewer
-        confirms it; “Zone Verified” is earned, never bought (C-120).
+        confirms it; “Zone Verified” is earned, never bought.
       </p>
     </div>
   );

@@ -59,7 +59,7 @@ export default function EpicInsights() {
           <p style={{ opacity: 0.7, fontSize: 13, lineHeight: 1.6, marginTop: 8 }}>
             Epic Pro turns your projects into a portfolio: completion rate, milestone progress,
             Zone-verified count, Legend outcomes earned, and funding across everything you build —
-            your own data (C-125). Upgrade below to unlock.
+            your own data. Upgrade below to unlock.
           </p>
         </div>
       ) : data.total === 0 ? (
@@ -99,7 +99,7 @@ export default function EpicInsights() {
           {data.funding.goalSum > 0 && (
             <div style={{ fontSize: 12, opacity: 0.75 }}>
               Funding targets: <strong style={{ color: TEC_COLORS.gold }}>{data.funding.goalSum}π</strong> · avg funded {data.funding.avgFundedPct}%
-              <span style={{ opacity: 0.6 }}> (presented from FundX — Epic never moves capital, C-125)</span>
+              <span style={{ opacity: 0.6 }}></span>
             </div>
           )}
         </div>

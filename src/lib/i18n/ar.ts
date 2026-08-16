@@ -22,4 +22,19 @@ export const ar = {
     appsTitle: 'منظومة TEC',
     appsCount: '24 تطبيق',
   },
+  epic: {
+    brand:   'TEC Epic',
+    tagline: 'المكان اللي بيبني فيه اقتصاد Pi حاجات جديدة. بتبني إيه؟',
+    nav: { home: 'الرئيسية', projects: 'المشاريع', pro: 'Pro', settings: 'الإعدادات' },
+    projects: 'المشاريع',
+    upgrade: 'الترقية',
+    discover: '🧭 اكتشف مشاريع Pi العامة →',
+    settings: {
+      profile: 'الملف الشخصي', planFree: 'مجاني', planPro: 'Pro',
+      connectedPi: 'متصل بـ Pi', notSignedIn: 'غير مسجّل الدخول', member: 'عضو TEC',
+      appearance: 'المظهر', language: 'اللغة', languageDesc: 'لغة العرض',
+      about: 'حول', version: 'الإصدار', domain: 'النطاق', ecosystem: 'المنظومة',
+      builtOn: 'مبني على', builtOnPi: 'شبكة Pi', logout: 'تسجيل الخروج',
+    },
+  },
 };
