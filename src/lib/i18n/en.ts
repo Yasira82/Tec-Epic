@@ -22,4 +22,19 @@ export const en = {
     appsTitle: 'TEC Ecosystem',
     appsCount: '24 Apps',
   },
+  epic: {
+    brand:   'TEC Epic',
+    tagline: 'Where the Pi economy builds new things. What are you building?',
+    nav: { home: 'Home', projects: 'Projects', pro: 'Pro', settings: 'Settings' },
+    projects: 'Projects',
+    upgrade: 'Upgrade',
+    discover: '🧭 Discover public Pi projects →',
+    settings: {
+      profile: 'Profile', planFree: 'Free', planPro: 'Pro',
+      connectedPi: 'Connected to Pi', notSignedIn: 'Not signed in', member: 'TEC Member',
+      appearance: 'Appearance', language: 'Language', languageDesc: 'Display language',
+      about: 'About', version: 'Version', domain: 'Domain', ecosystem: 'Ecosystem',
+      builtOn: 'Built on', builtOnPi: 'Pi Network', logout: 'Logout',
+    },
+  },
 };
