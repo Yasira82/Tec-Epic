@@ -135,13 +135,13 @@ Epic V0/V1 — Creation preview (customized from template):
      the project to LEGEND + emits epic.project.completed.v1 → Legend records the
      achievement (create → earn). Epic never records reputation itself.
 
-Next (before live):
-  □ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
+Live on Mainnet — all complete (SSoT: architecture/app-fleet.yaml):
+  ✅ Register Pi App ID (Pi Developer Portal) → Vercel NEXT_PUBLIC_PI_APP_ID +
     API_GATEWAY_URL · INTERNAL_SECRET · SSO_SECRET · PI_SANDBOX=false.
-  □ payment-service: set PI_API_KEY_EPIC on Railway (approve→502 otherwise, C-12 §11).
-  □ Hub SSO: add epic.tecosystem.app + tec-epic.vercel.app to Hub /api/auth/sso
+  ✅ payment-service: set PI_API_KEY_EPIC on Railway (approve→502 otherwise, C-12 §11).
+  ✅ Hub SSO: add epic.tecosystem.app + tec-epic.vercel.app to Hub /api/auth/sso
     ALLOWED_TARGETS + Hub domain registry.
-  □ Deploy (Vercel) + runtime-verify login (C-123) + a real Epic Pro payment
+  ✅ Deploy (Vercel) + runtime-verify login (C-123) + a real Epic Pro payment
     Mode 1 (Hub) AND Mode 2 (standalone).
 
 Epic V1+ (post-Portal — C-125): real project creation (STARTUP + COMMUNITY) → team
