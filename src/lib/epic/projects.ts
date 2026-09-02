@@ -37,6 +37,15 @@ export interface Project {
   milestones:   Milestone[];
 }
 
+// ⚠️ Every fixture below is UNVERIFIED, and that is enforced rather than
+// remembered (see the `verified` values). A sample row carrying a verification
+// badge is the platform verifying itself — C-120 and C-108 §4 both forbid it,
+// and C-135 §4 forbids a fabricated directory reaching a screen.
+//
+// These arrays are NOT rendered today; the pages resolve live data. That is
+// exactly why this matters: Explorer's seed was dead too, until someone wired
+// it and eight invented businesses appeared in production with six "Verified"
+// badges among them. A fixture is one import away from being real.
 export const PROJECTS: Project[] = [
   {
     id: 'pi-makers-hub',
@@ -46,7 +55,7 @@ export const PROJECTS: Project[] = [
     category: 'Community',
     team: 6,
     status: 'ACTIVE',
-    zoneVerified: true,
+    zoneVerified: false,
     milestones: [
       { title: 'Charter + first 50 members', done: true },
       { title: 'Weekly build sessions', done: true },
@@ -61,7 +70,7 @@ export const PROJECTS: Project[] = [
     category: 'Commerce',
     team: 4,
     status: 'FUNDED',
-    zoneVerified: true,
+    zoneVerified: false,
     fundingGoal: 5000,
     fundedPct: 72,
     milestones: [
@@ -92,7 +101,7 @@ export const PROJECTS: Project[] = [
     category: 'Hackathon',
     team: 8,
     status: 'COMPLETED',
-    zoneVerified: true,
+    zoneVerified: false,
     milestones: [
       { title: 'Venue + sponsors', done: true },
       { title: '30 teams registered', done: true },
@@ -107,7 +116,7 @@ export const PROJECTS: Project[] = [
     category: 'Social Impact',
     team: 5,
     status: 'LEGEND',
-    zoneVerified: true,
+    zoneVerified: false,
     milestones: [
       { title: 'Delivered all milestones', done: true },
       { title: 'Outcome verified by Zone', done: true },
