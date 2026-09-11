@@ -12,6 +12,7 @@ import { HUB_HOSTS }                 from '@/lib/pi-network';
 const ALLOWED_AUDIENCES = [
   'https://tec-epic.vercel.app',
   'https://epic.tecosystem.app',
+  'https://epic-test.tecosystem.app',
 ];
 const DEFAULT_REDIRECT = '/app';
 
