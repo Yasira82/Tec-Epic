@@ -14,7 +14,7 @@ import {
   createU2APayment,
 } from '@/lib/pi-payment';
 
-const EPIC_PRO = { id: 'epic-pro', name: 'Epic Pro (monthly)', price: 10 };
+const EPIC_PRO = { id: 'epic_pro_monthly', name: 'Epic Pro (monthly)', price: 10 };
 
 export default function EpicPro() {
   const [piReady, setPiReady] = useState(false);
@@ -68,7 +68,7 @@ export default function EpicPro() {
     if (!internalId) { setStatus('Could not start payment.'); return; }
 
     setStatus('Awaiting Pi approval…');
-    const result = await createU2APayment(price, name, { item_id: id }, internalId);
+    const result = await createU2APayment(price, name, { item_id: id, plan: 'PRO' }, internalId);
     setStatus(
       result.success ? `✅ Subscribed — txid ${result.txid}` :
       result.status === 'cancelled' ? 'Payment cancelled.' :
