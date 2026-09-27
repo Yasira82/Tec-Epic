@@ -9,8 +9,9 @@ import { TEC_COLORS } from '@yasser172/tec-ui';
 // and emits (epic.project.completed.v1) so Legend records the achievement (create →
 // earn). Identity is derived server-side from the session cookie by the BFF — this
 // button only sends the slug (P6). Honest states: 401 → sign in · 403 → not yours ·
-// 409 → already complete · 503 → backend unavailable. On success the page refreshes
-// so the lifecycle re-renders at LEGEND from live data.
+// 409 → already complete · 422 → milestones still open (the backend says how many) ·
+// 503 → backend unavailable. On success the page refreshes so the lifecycle
+// re-renders at LEGEND from live data.
 type Phase = 'idle' | 'busy' | 'done' | 'error';
 
 export default function CompleteProjectButton({ slug }: { slug: string }) {
@@ -69,8 +70,9 @@ export default function CompleteProjectButton({ slug }: { slug: string }) {
         <div style={{ marginTop: 8, fontSize: 12.5, color: TEC_COLORS.error }}>{msg}</div>
       )}
       <p style={{ marginTop: 8, fontSize: 11.5, opacity: 0.55, lineHeight: 1.5 }}>
-        Completing graduates this project to <strong>Legend</strong> and records the
-        achievement on your reputation. Only the project owner can complete it.
+        Completing graduates this project to <strong>Legend</strong> and records it on
+        your reputation. Every milestone must be done first. The achievement counts as
+        <strong> verified</strong> only if Zone has verified this project.
       </p>
     </div>
   );

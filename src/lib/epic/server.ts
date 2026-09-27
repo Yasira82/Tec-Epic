@@ -228,6 +228,26 @@ export interface CompleteResult {
 // backend emits epic.project.completed.v1 so Legend records the achievement (create →
 // earn). Returns the backend status so the UI can show an honest message
 // (401 no session · 403 not yours · 409 already complete · 503 unreachable).
+/**
+ * A caller-safe message for a refused completion (never leaks internal detail).
+ *
+ * 422 is the one case that passes the backend's own words through: it is the
+ * lifecycle rule (C12 — every milestone done first), written for the user, and it
+ * says how many milestones are still open. It used to share a branch with 400/409
+ * and read "already completed" — a wrong answer to someone who has not finished.
+ */
+export function completeErrorMessage(status: number, backendMessage?: unknown): string {
+  if (status === 403) return 'This is not your project.';
+  if (status === 404) return 'Project not found.';
+  if (status === 409) return 'This project is already completed.';
+  if (status === 422) {
+    return typeof backendMessage === 'string' && backendMessage.trim()
+      ? backendMessage.trim()
+      : 'Finish every milestone before completing the project.';
+  }
+  return 'Could not complete the project. Please try again.';
+}
+
 export async function completeProject(owner: string | null, slug: string): Promise<CompleteResult> {
   if (!owner) return { ok: false, status: 401, error: 'Sign in to complete your project.' };
   if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
@@ -243,12 +263,7 @@ export async function completeProject(owner: string | null, slug: string): Promi
       const p = (json?.data as Record<string, unknown> | undefined)?.project;
       return { ok: true, status: 200, project: p ? projectFromBackend(p as Record<string, unknown>) : undefined };
     }
-    // Map backend errors to a caller-safe message (never leak internal detail).
-    const msg = res.status === 403 ? 'This is not your project.'
-      : res.status === 404 ? 'Project not found.'
-      : res.status === 400 || res.status === 409 ? 'This project is already completed.'
-      : 'Could not complete the project. Please try again.';
-    return { ok: false, status: res.status, error: msg };
+    return { ok: false, status: res.status, error: completeErrorMessage(res.status, json?.message) };
   } catch {
     return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
   }
