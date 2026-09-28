@@ -24,6 +24,14 @@ export const en = {
   },
   epic: {
     brand:   'TEC Epic',
+    // C19 — "no session" and "signed in, but the backend did not answer" are
+    // different states; both used to say "Sign in with Pi".
+    loadState: {
+      signedOutTitle: 'No projects yet',
+      signedOut:      'Sign in with Pi to see the projects you\'re building. Create one to start the Epic → Zone → activity → Legend journey — it appears here once you do.',
+      downTitle:      'Couldn\'t load your projects',
+      down:           'You\'re signed in, but Epic didn\'t answer just now. Try again in a moment — nothing is shown rather than a guess.',
+    },
     tagline: 'Where the Pi economy builds new things. What are you building?',
     nav: { home: 'Home', projects: 'Projects', pro: 'Pro', settings: 'Settings' },
     projects: 'Projects',
