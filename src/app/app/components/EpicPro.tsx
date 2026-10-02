@@ -13,6 +13,7 @@ import {
   createPaymentRecord,
   createU2APayment,
 } from '@/lib/pi-payment';
+import { CancelProButton } from '@/components/pro/CancelProButton';
 
 const EPIC_PRO = { id: 'epic_pro_monthly', name: 'Epic Pro (monthly)', price: 10 };
 
@@ -88,6 +89,7 @@ export default function EpicPro() {
             {daysRemaining <= 7 ? '⏳ ' : ''}Expires in {daysRemaining} day{daysRemaining === 1 ? '' : 's'}{daysRemaining <= 7 ? ' — re-subscribe to keep Pro (one-time monthly, no auto-renewal).' : '.'}
           </div>
         )}
+        <CancelProButton />
       </div>
     );
   }
