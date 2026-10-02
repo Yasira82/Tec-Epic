@@ -1,6 +1,7 @@
 import {
   type Project, type ProjectType, type ProjectStatus, type Milestone,
 } from './projects';
+import { APP_SOURCE } from '@/lib/app-source';
 
 // Server-only Epic backend access (C-125). Calls the real Epic read-layer
 // (identity-service) via the gateway with the inter-service key, and maps the
@@ -64,7 +65,7 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
 export async function resolveProStatus(token: string | null): Promise<boolean> {
   if (!GW || !token) return false;
   try {
-    const res = await fetch(`${GW}/api/commerce/subscriptions/status`, {
+    const res = await fetch(`${GW}/api/commerce/subscriptions/status?app=${encodeURIComponent(APP_SOURCE)}`, {
       headers: { ...gwHeaders(), Authorization: `Bearer ${token}` }, cache: 'no-store',
     });
     if (!res.ok) return false;
