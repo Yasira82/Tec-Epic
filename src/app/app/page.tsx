@@ -1,5 +1,7 @@
 'use client';
 
+import { SignInGate } from '@/components/pi/SignInGate';
+
 // TEC Epic — Creation home (C-125), read-only V1.
 // A project board — where new economic initiatives are born. Epic OWNS creation
 // + lifecycle; verification (Zone), funding (FundX), reputation (Legend) are
@@ -17,7 +19,7 @@ import CreateProject from '@/components/epic/CreateProject';
 import { BottomNav, type EpicTab } from './components/BottomNav';
 import { SettingsView } from './components/SettingsView';
 
-export default function EpicHome() {
+function EpicHome() {
   const { t } = useTranslation();
   const me = useMe();   // C19: who is asking decides what an empty page says
   const [tab, setTab] = useState<EpicTab>('home');
@@ -172,4 +174,11 @@ export default function EpicHome() {
       <BottomNav active={tab} onSelect={setTab} />
     </main>
   );
+}
+
+// The door: a sign-in button before any screen when there is no session
+// (SignInGate — C-123 §10; owner, 2026-10-06). A visit from the Hub arrives
+// signed in (§12) and goes straight through.
+export default function EpicHomeGated() {
+  return <SignInGate><EpicHome /></SignInGate>;
 }
