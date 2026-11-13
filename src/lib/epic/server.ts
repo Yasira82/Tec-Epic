@@ -2,6 +2,7 @@ import {
   type Project, type ProjectType, type ProjectStatus, type Milestone,
 } from './projects';
 import { APP_SOURCE } from '@/lib/app-source';
+import { gatewayFetch } from '@/lib/gateway-fetch';
 
 // Server-only Epic backend access (C-125). Calls the real Epic read-layer
 // (identity-service) via the gateway with the inter-service key, and maps the
@@ -47,7 +48,7 @@ export interface ResolvedProjects { projects: Project[]; source: 'live' | 'unava
 export async function resolveOwnProjects(owner: string | null): Promise<ResolvedProjects> {
   if (GW && owner) {
     try {
-      const res = await fetch(`${GW}/api/identity/epic/projects/${encodeURIComponent(owner)}`, {
+      const res = await gatewayFetch(`${GW}/api/identity/epic/projects/${encodeURIComponent(owner)}`, {
         headers: gwHeaders(), cache: 'no-store',
       });
       if (res.ok) {
@@ -65,7 +66,7 @@ export async function resolveOwnProjects(owner: string | null): Promise<Resolved
 export async function resolveProStatus(token: string | null): Promise<boolean> {
   if (!GW || !token) return false;
   try {
-    const res = await fetch(`${GW}/api/commerce/subscriptions/status?app=${encodeURIComponent(APP_SOURCE)}`, {
+    const res = await gatewayFetch(`${GW}/api/commerce/subscriptions/status?app=${encodeURIComponent(APP_SOURCE)}`, {
       headers: { ...gwHeaders(), Authorization: `Bearer ${token}` }, cache: 'no-store',
     });
     if (!res.ok) return false;
@@ -100,7 +101,7 @@ export interface PortfolioInsights {
 export async function resolveInsights(owner: string | null): Promise<PortfolioInsights | null> {
   if (!GW || !owner) return null;
   try {
-    const res = await fetch(`${GW}/api/identity/epic/insights/${encodeURIComponent(owner)}`, { headers: gwHeaders(), cache: 'no-store' });
+    const res = await gatewayFetch(`${GW}/api/identity/epic/insights/${encodeURIComponent(owner)}`, { headers: gwHeaders(), cache: 'no-store' });
     if (!res.ok) return null;
     const insights = (await res.json().catch(() => ({})))?.data?.insights;
     return insights ?? null;
@@ -113,7 +114,7 @@ export async function resolveInsights(owner: string | null): Promise<PortfolioIn
 export async function setFeaturedForOwner(owner: string | null, on: boolean): Promise<boolean> {
   if (!GW || !owner) return false;
   try {
-    const res = await fetch(`${GW}/api/identity/epic/featured`, {
+    const res = await gatewayFetch(`${GW}/api/identity/epic/featured`, {
       method: 'PATCH', headers: gwHeaders(), body: JSON.stringify({ owner, featured: on }), cache: 'no-store',
     });
     return res.ok;
@@ -127,7 +128,7 @@ export async function resolveDiscover(category?: string): Promise<Project[]> {
   if (!GW) return [];
   try {
     const q = category && category.trim() ? `?category=${encodeURIComponent(category.trim())}` : '';
-    const res = await fetch(`${GW}/api/identity/epic/discover${q}`, { headers: gwHeaders(), cache: 'no-store' });
+    const res = await gatewayFetch(`${GW}/api/identity/epic/discover${q}`, { headers: gwHeaders(), cache: 'no-store' });
     if (!res.ok) return [];
     const rows = (await res.json().catch(() => ({})))?.data?.projects;
     return Array.isArray(rows) ? rows.map((p) => projectFromBackend(p as Record<string, unknown>)) : [];
@@ -153,7 +154,7 @@ export async function createProject(
   if (!owner) return { ok: false, status: 401, error: 'Sign in to create a project.' };
   if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
   try {
-    const res = await fetch(`${GW}/api/identity/epic/project`, {
+    const res = await gatewayFetch(`${GW}/api/identity/epic/project`, {
       method:  'POST',
       headers: gwHeaders(),
       body:    JSON.stringify({ owner, ...input }),
@@ -187,7 +188,7 @@ async function milestoneCall(
   if (!owner) return { ok: false, status: 401, error: 'Sign in to edit your project.' };
   if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
   try {
-    const res = await fetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/milestone`, {
+    const res = await gatewayFetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/milestone`, {
       method,
       headers: gwHeaders(),
       body:    JSON.stringify({ owner, ...body }),
@@ -253,7 +254,7 @@ export async function completeProject(owner: string | null, slug: string): Promi
   if (!owner) return { ok: false, status: 401, error: 'Sign in to complete your project.' };
   if (!GW)    return { ok: false, status: 503, error: 'The Epic backend is unavailable right now.' };
   try {
-    const res = await fetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/complete`, {
+    const res = await gatewayFetch(`${GW}/api/identity/epic/project/${encodeURIComponent(slug)}/complete`, {
       method:  'POST',
       headers: gwHeaders(),
       body:    JSON.stringify({ owner }),
@@ -292,7 +293,7 @@ export async function requestZoneVerification(
   if (!token) return { ok: false, status: 401, error: 'Sign in to request verification.' };
   if (!GW)    return { ok: false, status: 503, error: 'Zone is unavailable right now.' };
   try {
-    const res = await fetch(`${GW}/api/identity/zone/verification`, {
+    const res = await gatewayFetch(`${GW}/api/identity/zone/verification`, {
       method:  'POST',
       headers: zoneHeaders(token),
       body:    JSON.stringify({ type: 'PROJECT', name, summary, note: `Epic project "${name}" submitted for Zone verification.` }),
@@ -322,7 +323,7 @@ export async function zoneStatusForName(
 ): Promise<ZoneSubmissionStatus | null> {
   if (!token || !GW || !name.trim()) return null;
   try {
-    const res = await fetch(`${GW}/api/identity/zone/my/submissions`, {
+    const res = await gatewayFetch(`${GW}/api/identity/zone/my/submissions`, {
       headers: zoneHeaders(token), cache: 'no-store',
     });
     if (!res.ok) return null;
@@ -341,7 +342,7 @@ export interface ResolvedProject { project: Project | null; source: 'live' | 'un
 export async function resolveProject(id: string): Promise<ResolvedProject> {
   if (GW) {
     try {
-      const res = await fetch(`${GW}/api/identity/epic/project/${encodeURIComponent(id)}`, {
+      const res = await gatewayFetch(`${GW}/api/identity/epic/project/${encodeURIComponent(id)}`, {
         headers: gwHeaders(), cache: 'no-store',
       });
       if (res.ok) {
