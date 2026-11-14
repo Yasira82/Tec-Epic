@@ -85,8 +85,9 @@ export default function CreateProject({ onCreated }: { onCreated: (p: Project) =
         just gets it built.
       </p>
 
-      <label style={label}>Type</label>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+      {/* A group of choices, not a field — so a named group, not a <label>. */}
+      <span id="epic-type-label" style={label}>Type</span>
+      <div role="group" aria-labelledby="epic-type-label" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {TYPES.map((tp) => {
           const active = tp === type;
           return (
